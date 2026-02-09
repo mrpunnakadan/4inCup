@@ -48,7 +48,7 @@ function PointsTable({ title, data, color }) {
                                 <tr key={team.id} className="hover:bg-white/5 transition-colors">
                                     <td className="p-3 font-medium text-white flex items-center gap-2">
                                         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold 
-                                            ${i < 2 ? (isA ? 'bg-lime-500 text-black' : 'bg-emerald-500 text-black') : 'bg-neutral-800 text-neutral-500'}`}>
+                                            ${i < 4 ? (isA ? 'bg-lime-500 text-black' : 'bg-emerald-500 text-black') : 'bg-neutral-800 text-neutral-500'}`}>
                                             {i + 1}
                                         </span>
                                         {team.player1} & {team.player2}
