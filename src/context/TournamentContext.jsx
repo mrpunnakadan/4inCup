@@ -1,62 +1,23 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { GROUPS, STAGES, createTeam, generateGroupFixtures, calculateStandings, getSortedStandings, generateSemiFinals, generateFinal } from '../utils/logic';
+import initialData from '../data/tournament-data.json';
 
 const TournamentContext = createContext();
 
 export function TournamentProvider({ children }) {
     // State
-    const [data, setData] = useState({
-        teams: [],
-        matches: [],
-        stage: STAGES.GROUP
+    const [data, setData] = useState(() => {
+        const saved = localStorage.getItem('4inCup_v1');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return initialData || { teams: [], matches: [], stage: STAGES.GROUP };
     });
-    const [loading, setLoading] = useState(true);
 
-    // Load from API on mount and poll every 2 seconds
+    // Persist to LocalStorage whenever state changes
     useEffect(() => {
-        const loadData = () => {
-            fetch('/api/tournament')
-                .then(res => res.json())
-                .then(savedData => {
-                    if (savedData && savedData.teams) {
-                        setData(prev => {
-                            // Simple check to avoid unnecessary re-renders if stringified data is same
-                            // This is a basic optimization
-                            if (JSON.stringify(prev) === JSON.stringify(savedData)) return prev;
-
-                            return {
-                                teams: savedData.teams || [],
-                                matches: savedData.matches || [],
-                                stage: savedData.stage || STAGES.GROUP
-                            };
-                        });
-                    }
-                    setLoading(false);
-                })
-                .catch(err => {
-                    console.error("Failed to load tournament data", err);
-                    setLoading(false);
-                });
-        };
-
-        loadData(); // Initial load
-        const interval = setInterval(loadData, 2000); // Poll every 2s
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Persist to API whenever state changes
-    useEffect(() => {
-        if (loading) return;
-
-        // Debounce saving could be good, but for now direct save is fine for local use
-        fetch('/api/tournament', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).catch(console.error);
-
-    }, [data, loading]);
+        localStorage.setItem('4inCup_v1', JSON.stringify(data));
+    }, [data]);
 
     const actions = {
         addTeam: (p1, p2, group) => {
